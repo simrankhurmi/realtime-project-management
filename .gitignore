@@ -1,0 +1,39 @@
+# ─── Monorepo (ProjectManagment) ───────────────────────────────────
+
+# Root dependencies (concurrently, etc.)
+node_modules/
+
+# Environment secrets — never commit real .env files
+.env
+.env.local
+.env.*.local
+!**/.env.example
+
+# Build artifacts (also covered by workspace .gitignore files)
+backend/dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Optional local tooling
+.turbo/
+.vercel/
