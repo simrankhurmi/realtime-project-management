@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import { corsOptions } from './config/cors';
 import { env, isProduction } from './config/env';
 import routes from './routes';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware';
@@ -13,13 +14,12 @@ export const createApp = (): Application => {
 
   app.set('trust proxy', 1);
 
-  app.use(helmet());
   app.use(
-    cors({
-      origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
-      credentials: true,
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
     })
   );
+  app.use(cors(corsOptions));
   app.use(compression());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
