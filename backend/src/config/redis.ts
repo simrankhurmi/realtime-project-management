@@ -2,29 +2,41 @@ import Redis from 'ioredis';
 import { env } from './env';
 
 let redisClient: Redis | null = null;
+let warnedAboutMemoryFallback = false;
 
-export const getRedisClient = (): Redis => {
-  if (!redisClient) {
+export const getRedisClient = (): Redis | null => {
+  if (redisClient) {
+    return redisClient;
+  }
+
+  if (env.REDIS_URL) {
+    redisClient = new Redis(env.REDIS_URL, {
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      retryStrategy: (times) => (times > 2 ? null : Math.min(times * 200, 1000)),
+    });
+  } else {
     redisClient = new Redis({
       host: env.REDIS_HOST,
       port: env.REDIS_PORT,
       password: env.REDIS_PASSWORD || undefined,
       db: env.REDIS_DB,
-      maxRetriesPerRequest: 3,
-      retryStrategy: (times) => {
-        if (times > 3) return null;
-        return Math.min(times * 200, 2000);
-      },
-    });
-
-    redisClient.on('connect', () => {
-      console.log('Redis connected successfully');
-    });
-
-    redisClient.on('error', (error) => {
-      console.error('Redis error:', error);
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      retryStrategy: (times) => (times > 2 ? null : Math.min(times * 200, 1000)),
     });
   }
+
+  redisClient.on('connect', () => {
+    console.log('Redis connected successfully');
+  });
+
+  redisClient.on('error', (error) => {
+    if (!warnedAboutMemoryFallback) {
+      console.warn('Redis unavailable, falling back to in-memory token store:', error.message);
+      warnedAboutMemoryFallback = true;
+    }
+  });
 
   return redisClient;
 };

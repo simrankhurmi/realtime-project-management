@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { verifyAccessToken } from '../utils/jwt';
-import { getRedisClient, REDIS_KEYS } from '../config/redis';
+import { redisService } from '../services/redis.service';
+import { REDIS_KEYS } from '../config/redis';
 import { User } from '../models';
 
 declare global {
@@ -30,8 +31,7 @@ export const authenticate = async (
 
     const token = authHeader.split(' ')[1];
 
-    const redis = getRedisClient();
-    const isBlacklisted = await redis.get(REDIS_KEYS.blacklistedToken(token));
+    const isBlacklisted = await redisService.get(REDIS_KEYS.blacklistedToken(token));
     if (isBlacklisted) {
       throw ApiError.unauthorized('Token has been revoked');
     }

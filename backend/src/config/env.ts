@@ -15,6 +15,7 @@ const envSchema = z.object({
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().optional(),
   REDIS_DB: z.coerce.number().default(0),
+  REDIS_URL: z.string().optional(),
   CORS_ORIGIN: z
     .string()
     .default('http://localhost:5173,https://realtime-project-management.vercel.app'),
