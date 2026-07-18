@@ -43,18 +43,23 @@ export class AuthService {
       lastName: input.lastName,
     });
 
-    const tokens = await this.generateAndStoreTokens(user._id.toString(), user.email);
+    try {
+      const tokens = await this.generateAndStoreTokens(user._id.toString(), user.email);
 
-    return {
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-      },
-      tokens,
-    };
+      return {
+        user: {
+          id: user._id.toString(),
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        tokens,
+      };
+    } catch (error) {
+      await User.findByIdAndDelete(user._id);
+      throw error;
+    }
   }
 
   async login(input: LoginInput): Promise<AuthResult> {
